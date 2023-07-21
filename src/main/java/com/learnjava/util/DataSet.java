@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.learnjava.util.LoggerUtil.log;
+
 public class DataSet {
 
     public static List<String> lowerCaseAlphabetList = List.of("a", "b", "c", "a", "d", "e", "f", "e", "g", "h", "i");
@@ -66,6 +68,8 @@ public class DataSet {
     public static double generateRandomPrice() {
         int min = 50;
         int max = 100;
-        return Math.random() * (max - min + 1) + min;
+        double itemRate=Math.random() * (max - min + 1) + min;
+        log("Item Rate is : "+itemRate);
+        return itemRate;
     }
 }
