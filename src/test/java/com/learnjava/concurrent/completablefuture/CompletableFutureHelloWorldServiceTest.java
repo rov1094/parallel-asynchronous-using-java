@@ -49,6 +49,42 @@ class CompletableFutureHelloWorldServiceTest {
     }
 
     @Test
+    void helloworld_3_async_calls_log(){
+        CompletableFuture<String> result= cfhws.helloworld_3_async_calls_log();
+        result.thenAccept((s)->{
+                    assertEquals("HELLO WORLD! HI COMPLETABLEFUTURE!",s);
+                })
+                .join(); // Very Important to Join to wait for the assertion to get completed
+    }
+
+    @Test
+    void helloworld_3_async_calls_async(){
+        CompletableFuture<String> result= cfhws.helloworld_3_async_calls_async();
+        result.thenAccept((s)->{
+                    assertEquals("HELLO WORLD! HI COMPLETABLEFUTURE!",s);
+                })
+                .join(); // Very Important to Join to wait for the assertion to get completed
+    }
+
+    @Test
+    void helloworld_3_async_calls_customThreadPool(){
+        CompletableFuture<String> result= cfhws.helloworld_3_async_calls_customThreadPool();
+        result.thenAccept((s)->{
+                    assertEquals("HELLO WORLD! HI COMPLETABLEFUTURE!",s);
+                })
+                .join(); // Very Important to Join to wait for the assertion to get completed
+    }
+
+    @Test
+    void helloworld_3_async_calls_customThreadPool_async(){
+        CompletableFuture<String> result= cfhws.helloworld_3_async_calls_customThreadPool_async();
+        result.thenAccept((s)->{
+                    assertEquals("HELLO WORLD! HI COMPLETABLEFUTURE!",s);
+                })
+                .join(); // Very Important to Join to wait for the assertion to get completed
+    }
+
+    @Test
     void helloworld_4_async_calls(){
         String result= cfhws.helloWorld_4_async_calls();
         assertEquals("HELLO WORLD! HI COMPLETABLEFUTURE! BYE!",result);

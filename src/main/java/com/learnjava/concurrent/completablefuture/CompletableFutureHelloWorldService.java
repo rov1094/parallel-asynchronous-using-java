@@ -3,6 +3,8 @@ package com.learnjava.concurrent.completablefuture;
 import com.learnjava.service.HelloWorldService;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.learnjava.util.CommonUtil.*;
 import static com.learnjava.util.LoggerUtil.log;
@@ -63,6 +65,106 @@ public class CompletableFutureHelloWorldService {
                 .thenCombine(worldCF,(h,w)->h+w) // Here we are combining helloCF with WorldCF and (h->output of hello,w->output of w)
                 .thenCombine(hiCompletableFuture,(previous,current)->previous+current) //previous : Hello World , current : Hi CompletableFuture
                 .thenApply(String::toUpperCase);
+    }
+
+    public CompletableFuture<String> helloworld_3_async_calls_log(){
+        CompletableFuture<String> helloCF=CompletableFuture.supplyAsync(hws::hello);
+        CompletableFuture<String> worldCF=CompletableFuture.supplyAsync(hws::world);
+        CompletableFuture<String> hiCompletableFuture=CompletableFuture.supplyAsync(()->{
+            delay(1000);
+            return " Hi CompletableFuture!";
+        });
+
+        return helloCF
+                .thenCombine(worldCF,(h,w)->{
+                    log("Then Combine h/w");
+                    return h+w;
+                }) // Here we are combining helloCF with WorldCF and (h->output of hello,w->output of w)
+                .thenCombine(hiCompletableFuture,(previous,current)->{
+                    log("Then Combine prev/current");
+                    return previous+current;
+                }) //previous : Hello World , current : Hi CompletableFuture
+                .thenApply(s->{
+                    log("Then Apply");
+                    return s.toUpperCase();
+                });
+    }
+
+    public CompletableFuture<String> helloworld_3_async_calls_async(){
+        CompletableFuture<String> helloCF=CompletableFuture.supplyAsync(hws::hello);
+        CompletableFuture<String> worldCF=CompletableFuture.supplyAsync(hws::world);
+        CompletableFuture<String> hiCompletableFuture=CompletableFuture.supplyAsync(()->{
+            delay(1000);
+            return " Hi CompletableFuture!";
+        });
+
+        return helloCF
+                .thenCombineAsync(worldCF,(h,w)->{
+                    log("Then Combine h/w");
+                    return h+w;
+                }) // Here we are combining helloCF with WorldCF and (h->output of hello,w->output of w)
+                .thenCombineAsync(hiCompletableFuture,(previous,current)->{
+                    log("Then Combine prev/current");
+                    return previous+current;
+                }) //previous : Hello World , current : Hi CompletableFuture
+                .thenApplyAsync(s->{
+                    log("Then Apply");
+                    return s.toUpperCase();
+                });
+    }
+
+    public CompletableFuture<String> helloworld_3_async_calls_customThreadPool(){
+
+        ExecutorService executorService= Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        CompletableFuture<String> helloCF=CompletableFuture.supplyAsync(hws::hello,executorService);
+        CompletableFuture<String> worldCF=CompletableFuture.supplyAsync(hws::world,executorService);
+        CompletableFuture<String> hiCompletableFuture=CompletableFuture.supplyAsync(()->{
+            delay(1000);
+            log("in Hi CompletableFuture");
+            return " Hi CompletableFuture!";
+        },executorService);
+
+        return helloCF
+                .thenCombine(worldCF,(h,w)->{
+                    log("Then Combine h/w");
+                    return h+w;
+                }) // Here we are combining helloCF with WorldCF and (h->output of hello,w->output of w)
+                .thenCombine(hiCompletableFuture,(previous,current)->{
+                    log("Then Combine prev/current");
+                    return previous+current;
+                }) //previous : Hello World , current : Hi CompletableFuture
+                .thenApply(s->{
+                    log("Then Apply");
+                    return s.toUpperCase();
+                });
+    }
+
+    public CompletableFuture<String> helloworld_3_async_calls_customThreadPool_async(){
+
+        ExecutorService executorService= Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        CompletableFuture<String> helloCF=CompletableFuture.supplyAsync(hws::hello,executorService);
+        CompletableFuture<String> worldCF=CompletableFuture.supplyAsync(hws::world,executorService);
+        CompletableFuture<String> hiCompletableFuture=CompletableFuture.supplyAsync(()->{
+            delay(1000);
+            log("in Hi CompletableFuture");
+            return " Hi CompletableFuture!";
+        },executorService);
+
+        return helloCF
+                .thenCombineAsync(worldCF,(h,w)->{
+                    log("Then Combine h/w");
+                    return h+w;
+                },executorService) // Here we are combining helloCF with WorldCF and (h->output of hello,w->output of w)
+                .thenCombineAsync(hiCompletableFuture,(previous,current)->{
+                    log("Then Combine prev/current");
+                    return previous+current;
+                },executorService) //previous : Hello World , current : Hi CompletableFuture
+                .thenApplyAsync(s->{
+                    log("Then Apply");
+                    return s.toUpperCase();
+                },executorService);
     }
 
     public static void main(String[] args) {

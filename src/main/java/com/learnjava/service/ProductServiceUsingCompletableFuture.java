@@ -59,6 +59,7 @@ public class ProductServiceUsingCompletableFuture {
 
     public Product retrieveProductDetailsWithInventory_approach2(String productId) {
         stopWatch.start();
+        //We want to stop process if error occurs for product
         CompletableFuture<ProductInfo> productInfoCompletableFuture=CompletableFuture
                 .supplyAsync(()->productInfoService.retrieveProductInfo(productId))
                 .thenApply(productInfo -> {
@@ -66,9 +67,17 @@ public class ProductServiceUsingCompletableFuture {
                     return productInfo;
                 });
 
-        CompletableFuture<Review> reviewCompletableFuture=CompletableFuture.supplyAsync(()->reviewService.retrieveReviews(productId));
+        CompletableFuture<Review> reviewCompletableFuture=CompletableFuture
+                .supplyAsync(()->reviewService.retrieveReviews(productId))
+                .exceptionally((e)->{
+                    log("Error in Retrieve Review : "+e);
+                    return Review.builder().noOfReviews(0).overallRating(0).build();
+                });
         Product product=productInfoCompletableFuture
                 .thenCombine(reviewCompletableFuture,(productInfo,review)->new Product(productId, productInfo, review))
+                .whenComplete((res,e)->{
+                    log("Exception Occurred in when complete :: "+e);
+                })
                 .join(); // block the thread
         stopWatch.stop();
         log("Total Time Taken : "+ stopWatch.getTime());
@@ -92,6 +101,10 @@ public class ProductServiceUsingCompletableFuture {
                 .map(productOption -> {
                     CompletableFuture<ProductOption> productOptionCF=CompletableFuture
                             .supplyAsync(()->inventoryService.addInventory(productOption))
+                            .exceptionally((e)->{
+                                log("Exception Occured in Inventory : "+e);
+                                return Inventory.builder().count(1).build();
+                            })
                             .thenApply(inventory -> {
                                 productOption.setInventory(inventory);
                                 return productOption;
@@ -118,6 +131,26 @@ public class ProductServiceUsingCompletableFuture {
         Product product = productService.retrieveProductDetails(productId);
         log("Product is " + product);
 
+    }
+
+
+    private List<ProductOption> updateInventory_approach(List<ProductOption> productOptions) {
+
+        List<CompletableFuture<ProductOption>> productOptionList= productOptions.stream()
+                .map(productOption -> {
+                    CompletableFuture<ProductOption> productOptionCF=CompletableFuture
+                            .supplyAsync(()->inventoryService.addInventory(productOption))
+                            .exceptionally((e)->{
+                                log("Exception Occured in Inventory : "+e);
+                                return Inventory.builder().count(1).build();
+                            })
+                            .thenApply(inventory -> {
+                                productOption.setInventory(inventory);
+                                return productOption;
+                            });
+                    return productOptionCF;
+                }).collect(Collectors.toList());
+        return productOptionList.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 
 
