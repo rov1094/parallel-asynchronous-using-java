@@ -2,6 +2,7 @@ package com.learnjava.concurrent.completablefuture;
 
 import com.learnjava.service.HelloWorldService;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -165,6 +166,43 @@ public class CompletableFutureHelloWorldService {
                     log("Then Apply");
                     return s.toUpperCase();
                 },executorService);
+    }
+
+    /**
+     * Send response from any of the competableFuture and discard the other
+     * @return
+     */
+    public String anyOf(){
+        //Db
+        CompletableFuture<String> db=CompletableFuture.supplyAsync(()->{
+            delay(4000);
+           log("Response from DB");
+           return "Hello World!";
+        });
+
+        //Rest Call
+        CompletableFuture<String> restCall=CompletableFuture.supplyAsync(()->{
+            delay(2000);
+            log("Response from restCall");
+            return "Hello World!";
+        });
+
+        //SOAP Call
+        CompletableFuture<String> soapCall=CompletableFuture.supplyAsync(()->{
+            delay(3000);
+            log("Response from soapCall");
+            return "Hello World!";
+        });
+        var cfList=List.of(db,restCall,soapCall);
+        CompletableFuture<Object> resultCf=CompletableFuture.anyOf(cfList.toArray(new CompletableFuture[cfList.size()]));
+
+        String result=(String) resultCf.thenApply(v->{
+            if(v instanceof String){
+                return v;
+            }
+            return null;
+        }).join();
+        return result;
     }
 
     public static void main(String[] args) {

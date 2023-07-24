@@ -98,4 +98,10 @@ class CompletableFutureHelloWorldServiceTest {
                 })
                 .join(); // Very Important to Join to wait for the assertion to get completed
     }
+
+    @Test
+    void anyOf() {
+        String result=cfhws.anyOf();
+        assertEquals("Hello World!",result);
+    }
 }
